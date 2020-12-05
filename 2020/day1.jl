@@ -16,22 +16,19 @@ In this list, the two entries that sum to 2020 are 1721 and 299. Multiplying the
 Of course, your expense report is much larger. Find the two entries that sum to 2020; what do you get if you multiply them together?
 =#
 
+using Combinatorics: combinations
+
 input = parse.(Int, readlines("day1-input.txt"))
 
-for i in 1:length(input)-1
-  for j in i+1:length(input)
-    n1 = input[i]
-    n2 = input[j]
-    if n1 + n2 == 2020
-      print("day1, part1: $(n1)*$(n2) = $(n1*n2)\n")
-    end
+for (n1, n2) in combinations(input, 2)
+  if n1 + n2 == 2020
+    print("day1, part1: $(n1)*$(n2) = $(n1*n2)\n")
+  end
+end
 
-    for k in j+1:length(input)
-      n3 = input[k]
-      if n1 + n2 + n3 == 2020
-        print("day1, part2: $(n1)*$(n2)*$(n3) = $(n1*n2*n3)\n")
-      end
-    end
+for (n1, n2, n3) in combinations(input, 3)
+  if n1 + n2 + n3 == 2020
+    print("day1, part2: $(n1)*$(n2)*$(n3) = $(n1*n2*n3)\n")
   end
 end
 
