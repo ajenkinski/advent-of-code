@@ -5,7 +5,7 @@ https://adventofcode.com/2020/day/7
 # Represent input as a directed graph with weighted edges.  Node names are the bag colors, 
 # edge weights are required number of bags.  Node A has an edge to B if bag color A contains one or more Bs.
 
-using LightGraphs: SimpleDiGraph, add_edge!, edges, dfs_tree, neighbors
+using LightGraphs: add_edge!, edges, dfs_tree, neighbors
 using MetaGraphs: MetaDiGraph, set_prop!, set_indexing_prop!, get_prop
 
 graph = let lines = readlines("day7-input.txt")
@@ -17,7 +17,7 @@ graph = let lines = readlines("day7-input.txt")
 
   label_to_idx = Dict(map(((i, node),) -> (node[1], i), enumerate(nodes)))
 
-  g = MetaDiGraph(SimpleDiGraph(length(nodes)))
+  g = MetaDiGraph(length(nodes))
 
   for (label, ngbrs_str) in nodes
     node_idx = label_to_idx[label]
