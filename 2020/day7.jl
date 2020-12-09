@@ -2,8 +2,8 @@
 https://adventofcode.com/2020/day/7
 =#
 
-# Represent input as a directed graph with weighted edges.  Node names are the bag colors, 
-# edge weights are required number of bags.  Node A has an edge to B if bag color A contains one or more Bs.
+# Represent input as a directed graph with weighted edges.  Node names are the bag colors, edge weights are required
+# number of bags.  Node A has an edge to B if bag color A contains one or more Bs.
 
 using LightGraphs: add_edge!, edges, dfs_tree, neighbors
 using MetaGraphs: MetaDiGraph, set_prop!, set_indexing_prop!, get_prop
@@ -40,16 +40,16 @@ function reachable_nodes(g, start_color)
 end
 
 
-# Part 1 asks to how many different bag colors can directly or indirectly contain a "shiny gold" bag.
-# For this I want to find all ancestor nodes of the shiny gold node.  Since my graph edges express the "contains" relation, I'll 
-# reverse the graph so the edges express "contained by".
+# Part 1 asks to how many different bag colors can directly or indirectly contain a "shiny gold" bag.  For this I want
+# to find all ancestor nodes of the shiny gold node.  Since my graph edges express the "contains" relation, I'll reverse
+# the graph so the edges express "contained by".
 
 part1_node_ids = reachable_nodes(reverse(graph), "shiny gold")
 print("Part 1: shiny gold is contained by $(length(part1_node_ids)) bags\n")
 
 
-# Part 2 requires counting how many bags are in a "shiny gold" bag, or in graph terms, finding all reachable nodes and finding the
-# sum of the cumulative product of weights along each path.
+# Part 2 requires counting how many bags are in a "shiny gold" bag, or in graph terms, finding all reachable nodes and
+# finding the sum of the cumulative product of weights along each path.
 
 "Counts number of bags directly or indirectly contained by the bag represented by start_node"
 function count_bags(g, start_node)
