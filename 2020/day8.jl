@@ -66,8 +66,7 @@ print("Part 1: After execution accumulator = $(part1_answer)\n")
 machine, normal_exit = exec_program(input)
 @assert !normal_exit
 
-for i in keys(input)
-  ins = input[i]
+for (i, ins) in pairs(input)
   if ins.op_code in ["jmp", "nop"]
     new_ins = Instruction(ins.op_code == "nop" ? "jmp" : "nop", ins.arg)
     new_input = copy(input)
