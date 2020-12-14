@@ -12,10 +12,10 @@ graph = let lines = readlines("day7-input.txt")
   nodes = map(lines) do line
     m = match(r"^(.+) bags contain (.+)$", line)
     @assert m != nothing
-    m.captures
+    (label=m.captures[1], ngbrs_str=m.captures[2])
   end
 
-  label_to_idx = Dict(map(((i, node),) -> (node[1], i), enumerate(nodes)))
+  label_to_idx = Dict(map(((i, node),) -> (node.label, i), enumerate(nodes)))
 
   g = MetaDiGraph(length(nodes))
 

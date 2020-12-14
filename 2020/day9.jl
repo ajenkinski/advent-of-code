@@ -1,3 +1,8 @@
+#=
+https://adventofcode.com/2020/day/9
+=#
+
+
 input = parse.(Int, readlines("day9-input.txt"))
 
 "
@@ -53,7 +58,7 @@ function part2_calc(numbers, target)
   return nothing, nothing
 end
 
-first_idx, last_idx = part2_calc(input, 375054920)
+first_idx, last_idx = part2_calc(input, part1_answer)
 @assert first_idx != nothing
 part2_answer = sum(extrema(input[first_idx:last_idx]))
 print("Part 2: $(part2_answer)")
