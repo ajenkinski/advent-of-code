@@ -2,7 +2,7 @@
 https://adventofcode.com/2020/day/10
 =#
 
-using LightGraphs: add_edge!, neighbors, SimpleDiGraph
+using LightGraphs: add_edge!, neighbors, DiGraph
 
 input = parse.(Int, readlines("day10-input.txt"))
 
@@ -33,7 +33,7 @@ print("Part 1: $(part1_answer)\n")
 # is an edge from A to B if adapter A can be connected to B.  Then the problem becomes: how many paths are there from
 # the power outlet vertex to the device vertex.
 
-graph = SimpleDiGraph(length(adapters))
+graph = DiGraph(length(adapters))
 
 for (i, val) in pairs(adapters)
   # Takes advantage of fact that adapters array is sorted
