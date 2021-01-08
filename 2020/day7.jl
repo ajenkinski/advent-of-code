@@ -12,7 +12,7 @@ graph = let lines = readlines("day7-input.txt")
   nodes = map(lines) do line
     m = match(r"^(.+) bags contain (.+)$", line)
     @assert m != nothing
-    (label=m.captures[1], ngbrs_str=m.captures[2])
+    (label = m.captures[1], ngbrs_str = m.captures[2])
   end
 
   label_to_idx = Dict(map(((i, node),) -> (node.label, i), enumerate(nodes)))
@@ -24,7 +24,13 @@ graph = let lines = readlines("day7-input.txt")
     set_prop!(g, node_idx, :color, label)
 
     for m in eachmatch(r"(\d+) (.*?) bag", ngbrs_str)
-      add_edge!(g, node_idx, label_to_idx[m.captures[2]], :weight, parse(Int, m.captures[1]))
+      add_edge!(
+        g,
+        node_idx,
+        label_to_idx[m.captures[2]],
+        :weight,
+        parse(Int, m.captures[1]),
+      )
     end
   end
 
@@ -66,4 +72,3 @@ end
 
 part2_answer = count_bags(graph, graph["shiny gold", :color])
 print("Part 2: num bags in shiny gold bag = $(part2_answer)\n")
-

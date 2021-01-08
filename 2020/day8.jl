@@ -10,7 +10,7 @@ end
 "Virtual machine state"
 mutable struct Machine
   program::Array{Instruction,1}
-  
+
   "Program counter: index into program of next instruction to execute"
   pc::Int
 
@@ -27,7 +27,6 @@ end
 Execution stops when an instruction is about to be repeated or the program counter goes out of bounds.  Return value is
 a (machine, bool) tuple, where the bool indicates whether the program exited normally, where normal is defined by the
 program counter ending up at one past the end of the instructions."
-
 function exec_program(instructions)
   machine = Machine(instructions, 1, 0)
 
@@ -80,4 +79,3 @@ end
 
 @assert normal_exit
 print("Part 2: accumulator after fixing program: $(machine.accumulator)\n")
-

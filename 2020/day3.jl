@@ -58,9 +58,11 @@ Starting at the top-left corner of your map and following a slope of right 3 and
 lines = readlines("day3-input.txt")
 
 function num_trees_for_slope(slope_right, slope_down)
-  return count(zip(1:slope_down:length(lines), Iterators.countfrom(1, slope_right))) do (row_num, col_num)
+  return count(
+    zip(1:slope_down:length(lines), Iterators.countfrom(1, slope_right)),
+  ) do (row_num, col_num)
     line = lines[row_num]
-    return line[((col_num - 1) % length(line)) + 1] == '#'
+    return line[((col_num-1)%length(line))+1] == '#'
   end
 end
 
@@ -75,4 +77,3 @@ part2_answer = prod(part2_slopes) do (slope_right, slope_down)
 end
 
 print("Part 2: answer = $(part2_answer)\n")
-

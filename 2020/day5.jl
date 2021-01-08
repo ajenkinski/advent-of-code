@@ -40,7 +40,7 @@ seat_ids = sort(map(compute_seat_id, input))
 # find the gap in the sequence
 missing_id = -1
 
-for i in 1:length(seat_ids) - 1
+for i = 1:length(seat_ids)-1
   if seat_ids[i] != seat_ids[i+1] - 1
     global missing_id = seat_ids[i] + 1
     break
@@ -48,4 +48,3 @@ for i in 1:length(seat_ids) - 1
 end
 
 print("Part 2: Missing seat id = $(missing_id)\n")
-

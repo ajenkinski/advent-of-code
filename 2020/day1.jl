@@ -31,4 +31,3 @@ for (n1, n2, n3) in combinations(input, 3)
     print("day1, part2: $(n1)*$(n2)*$(n3) = $(n1*n2*n3)\n")
   end
 end
-

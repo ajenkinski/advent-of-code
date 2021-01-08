@@ -42,8 +42,10 @@ end
 function is_valid_part2(entry)
   len = length(entry.password)
 
-  return xor(len >= entry.num1 && entry.password[entry.num1] == entry.char, 
-             len >= entry.num2 && entry.password[entry.num2] == entry.char)
+  return xor(
+    len >= entry.num1 && entry.password[entry.num1] == entry.char,
+    len >= entry.num2 && entry.password[entry.num2] == entry.char,
+  )
 end
 
 # Parse input file into an array of Entry objects
@@ -61,6 +63,5 @@ end
 
 
 print("Part 1: Num valid = $(count(is_valid_part1, input))\n")
-    
-print("Part 2: Num valid = $(count(is_valid_part2, input))\n")
 
+print("Part 2: Num valid = $(count(is_valid_part2, input))\n")
