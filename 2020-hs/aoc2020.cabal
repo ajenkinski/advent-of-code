@@ -1,0 +1,88 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 21bdf94d0c3f5a1912ec9309cce69541524ef80bebeeb8140f7f6006f0422ffc
+
+name:           aoc2020
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/aoc2020#readme>
+homepage:       https://github.com/githubuser/aoc2020#readme
+bug-reports:    https://github.com/githubuser/aoc2020/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2021 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/aoc2020
+
+library
+  exposed-modules:
+      Day01
+      Day02
+      Day03
+      Day04
+      Day05
+      Day07
+      Day12
+      Day13
+      Day18
+      Day19
+      Lib
+      Utils
+  other-modules:
+      Paths_aoc2020
+  hs-source-dirs:
+      src
+  build-depends:
+      MissingH
+    , array
+    , base >=4.7 && <5
+    , containers
+    , mtl
+    , regex-tdfa
+  default-language: Haskell2010
+
+executable aoc2020-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_aoc2020
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      MissingH
+    , aoc2020
+    , array
+    , base >=4.7 && <5
+    , containers
+    , mtl
+    , regex-tdfa
+  default-language: Haskell2010
+
+test-suite aoc2020-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_aoc2020
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      MissingH
+    , aoc2020
+    , array
+    , base >=4.7 && <5
+    , containers
+    , mtl
+    , regex-tdfa
+  default-language: Haskell2010

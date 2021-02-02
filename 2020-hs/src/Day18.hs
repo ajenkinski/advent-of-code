@@ -1,0 +1,149 @@
+module Day18 where
+
+import Control.Monad.Except (ExceptT, lift, runExceptT, throwError)
+import Control.Monad.State.Lazy (State, evalState, gets, state)
+import qualified Data.Char as Char
+import Data.List (span)
+import qualified Data.Map as Map
+import Data.Maybe (listToMaybe)
+import Utils (Solver)
+
+type NumType = Int
+
+data Token
+  = Op Char
+  | Lparen
+  | Rparen
+  | Number NumType
+  deriving (Show)
+
+data Ast
+  = BinOp Ast Char Ast
+  | Value NumType
+  deriving (Show)
+
+type PrecedenceMap = Map.Map Char Int
+
+-- >>> tokenize "1 + (2 * 3)"
+-- [Number 1,Op '+',Lparen,Number 2,Op '*',Number 3,Rparen]
+tokenize :: String -> [Token]
+tokenize [] = []
+tokenize expr@(ch : rest)
+  | Char.isSpace ch = tokenize rest
+  | Char.isDigit ch =
+    let (digits, rest) = span Char.isDigit expr
+     in Number (read digits) : tokenize rest
+  | ch == '(' = Lparen : tokenize rest
+  | ch == ')' = Rparen : tokenize rest
+  | ch `elem` ['+', '-', '*', '/'] = Op ch : tokenize rest
+  | otherwise = error ("Unrecognized character: '" ++ show ch ++ "'")
+
+data ParserState = PS
+  { tokens :: [Token],
+    precMap :: PrecedenceMap
+  }
+
+-- Parser is a combination of the Except and State monads
+type Parser = ExceptT String (State ParserState)
+
+getTokens :: Parser [Token]
+getTokens = lift $ gets tokens
+
+nextToken :: Parser Token
+nextToken = do
+  toks <- getTokens
+  case toks of
+    [] -> throwError "Unexpected end of expression"
+    tok : rest -> lift $ state (\ps -> (tok, ps {tokens = rest}))
+
+peekToken :: Parser (Maybe Token)
+peekToken = listToMaybe <$> getTokens
+
+getPrecedence :: Char -> Parser Int
+getPrecedence op = do
+  precs <- lift $ gets precMap
+  return $ Map.findWithDefault 1 op precs
+
+parseExpression :: Int -> Parser Ast
+parseExpression precedence =
+  do
+    lhs <- parseOperand
+    parseWhilePrecedenceHigher lhs
+  where
+    parseWhilePrecedenceHigher lhs =
+      do
+        next <- peekToken
+        case next of
+          Nothing -> return lhs
+          Just Rparen -> return lhs
+          Just (Op op) -> do
+            opPrecedence <- getPrecedence op
+            if opPrecedence <= precedence
+              then return lhs
+              else do
+                nextToken
+                rhs <- parseExpression opPrecedence
+                parseWhilePrecedenceHigher $ BinOp lhs op rhs
+          Just tok -> throwError $ "Unexpected token where operator expected: " ++ show tok
+
+-- Parse either parenthesized expression or number
+parseOperand :: Parser Ast
+parseOperand = do
+  tok <- nextToken
+  case tok of
+    Lparen -> do
+      result <- parseExpression 0
+      close <- nextToken
+      case close of
+        Rparen -> return result
+        _ -> throwError "Missing expected ')'"
+    Number n -> return $ Value n
+    _ -> throwError $ "Unexpected token: " ++ show tok
+
+-- >>> parseLine Map.empty "1 + (2 * 3)"
+-- Right (BinOp (Value 1) '+' (BinOp (Value 2) '*' (Value 3)))
+-- >>> parseLine Map.empty "1 +"
+-- Left "Unexpected end of expression"
+-- >>> parseLine Map.empty "1 + (2 3)"
+-- Left "Unexpected token where operator expected: Number 3"
+-- >>> parseLine (Map.fromList [('+', 2), ('*', 1)]) "1 * 2 + 3"
+-- Right (BinOp (Value 1) '*' (BinOp (Value 2) '+' (Value 3)))
+parseLine :: PrecedenceMap -> String -> Either String Ast
+parseLine precMap line =
+  let tokens = tokenize line
+      parser = PS tokens precMap
+   in evalState (runExceptT (parseExpression 0)) parser
+
+evalExpression :: Ast -> Either String NumType
+evalExpression expr =
+  case expr of
+    BinOp lhs op rhs -> do
+      lhsVal <- evalExpression lhs
+      rhsVal <- evalExpression rhs
+      case op of
+        '+' -> return (lhsVal + rhsVal)
+        '-' -> return (lhsVal - rhsVal)
+        '*' -> return (lhsVal * rhsVal)
+        '/' -> return (lhsVal `div` rhsVal)
+        _ -> throwError $ "Unknown operator: " ++ show op
+    Value n -> Right n
+
+evalExpressionString :: PrecedenceMap -> String -> Either String NumType
+evalExpressionString precs expr =
+  do
+    ast <- parseLine precs expr
+    evalExpression ast
+
+solveProblem :: PrecedenceMap -> [String] -> NumType
+solveProblem precs exprs =
+  case mapM (evalExpressionString precs) exprs of
+    Left errMsg -> error errMsg
+    Right values -> sum values
+
+solve :: Solver 
+solve input =
+    let exprs = lines input
+        part1Answer = solveProblem Map.empty exprs
+
+        part2Answer = solveProblem (Map.fromList [('+', 2), ('*', 1)]) exprs
+    in [part1Answer, part2Answer]
