@@ -1,7 +1,7 @@
 module Day18 where
 
-import Control.Monad.Except (ExceptT, lift, runExceptT, throwError)
-import Control.Monad.State.Lazy (State, evalState, gets, state)
+import Control.Monad.Except (throwError)
+import Control.Monad.State.Lazy (StateT, evalStateT, gets, state)
 import qualified Data.Char as Char
 import Data.List (span)
 import qualified Data.Map as Map
@@ -43,25 +43,25 @@ data ParserState = PS
     precMap :: PrecedenceMap
   }
 
--- Parser is a combination of the Except and State monads
-type Parser = ExceptT String (State ParserState)
+-- Parser is a combination of the Either and State monads
+type Parser = StateT ParserState (Either String)
 
 getTokens :: Parser [Token]
-getTokens = lift $ gets tokens
+getTokens = gets tokens
 
 nextToken :: Parser Token
 nextToken = do
   toks <- getTokens
   case toks of
     [] -> throwError "Unexpected end of expression"
-    tok : rest -> lift $ state (\ps -> (tok, ps {tokens = rest}))
+    tok : rest -> state (\ps -> (tok, ps {tokens = rest}))
 
 peekToken :: Parser (Maybe Token)
 peekToken = listToMaybe <$> getTokens
 
 getPrecedence :: Char -> Parser Int
 getPrecedence op = do
-  precs <- lift $ gets precMap
+  precs <- gets precMap
   return $ Map.findWithDefault 1 op precs
 
 parseExpression :: Int -> Parser Ast
@@ -112,7 +112,7 @@ parseLine :: PrecedenceMap -> String -> Either String Ast
 parseLine precMap line =
   let tokens = tokenize line
       parser = PS tokens precMap
-   in evalState (runExceptT (parseExpression 0)) parser
+   in evalStateT (parseExpression 0) parser
 
 evalExpression :: Ast -> Either String NumType
 evalExpression expr =
