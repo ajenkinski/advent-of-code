@@ -30,18 +30,18 @@ type PrecedenceMap = Map.Map Char Int
 -- Left "Unrecognized character: 'x'"
 tokenize :: String -> Either String [Token]
 tokenize expr = sequence $ tokenize' expr
-    where
-        tokenize' :: String -> [Either String Token]
-        tokenize' [] = []
-        tokenize' expr@(ch : rest)
-            | Char.isSpace ch = tokenize' rest
-            | Char.isDigit ch =
-                let (digits, rest) = span Char.isDigit expr
-                in Right (Number (read digits)) : tokenize' rest
-            | ch == '(' = Right Lparen : tokenize' rest
-            | ch == ')' = Right Rparen : tokenize' rest
-            | ch `elem` ['+', '-', '*', '/'] = Right (Op ch) : tokenize' rest
-            | otherwise = [Left ("Unrecognized character: " ++ show ch)]
+  where
+    tokenize' :: String -> [Either String Token]
+    tokenize' [] = []
+    tokenize' expr@(ch : rest)
+      | Char.isSpace ch = tokenize' rest
+      | Char.isDigit ch =
+        let (digits, rest) = span Char.isDigit expr
+         in Right (Number (read digits)) : tokenize' rest
+      | ch == '(' = Right Lparen : tokenize' rest
+      | ch == ')' = Right Rparen : tokenize' rest
+      | ch `elem` ['+', '-', '*', '/'] = Right (Op ch) : tokenize' rest
+      | otherwise = [Left ("Unrecognized character: " ++ show ch)]
 
 data ParserState = PS
   { tokens :: [Token],
@@ -115,9 +115,9 @@ parseOperand = do
 -- Right (BinOp (Value 1) '*' (BinOp (Value 2) '+' (Value 3)))
 parseLine :: PrecedenceMap -> String -> Either String Ast
 parseLine precMap line = do
-    tokens <- tokenize line
-    let parser = PS tokens precMap
-    evalStateT (parseExpression 0) parser
+  tokens <- tokenize line
+  let parser = PS tokens precMap
+  evalStateT (parseExpression 0) parser
 
 evalExpression :: Ast -> Either String NumType
 evalExpression expr =
@@ -147,8 +147,8 @@ solveProblem precs exprs =
 
 solve :: Solver
 solve input =
-    let exprs = lines input
-        part1Answer = solveProblem Map.empty exprs
+  let exprs = lines input
+      part1Answer = solveProblem Map.empty exprs
 
-        part2Answer = solveProblem (Map.fromList [('+', 2), ('*', 1)]) exprs
-    in [part1Answer, part2Answer]
+      part2Answer = solveProblem (Map.fromList [('+', 2), ('*', 1)]) exprs
+   in [part1Answer, part2Answer]

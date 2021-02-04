@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 21bdf94d0c3f5a1912ec9309cce69541524ef80bebeeb8140f7f6006f0422ffc
+-- hash: f967ac72fb2e85e57335c713ca3bd7eedda0ffc5380cb58c44bedcce16a8cc78
 
 name:           aoc2020
 version:        0.1.0.0
@@ -36,6 +36,7 @@ library
       Day12
       Day13
       Day18
+      Day18Parsec
       Day19
       Lib
       Utils
@@ -49,6 +50,7 @@ library
     , base >=4.7 && <5
     , containers
     , mtl
+    , parsec
     , regex-tdfa
   default-language: Haskell2010
 
@@ -66,6 +68,7 @@ executable aoc2020-exe
     , base >=4.7 && <5
     , containers
     , mtl
+    , parsec
     , regex-tdfa
   default-language: Haskell2010
 
@@ -84,5 +87,6 @@ test-suite aoc2020-test
     , base >=4.7 && <5
     , containers
     , mtl
+    , parsec
     , regex-tdfa
   default-language: Haskell2010
