@@ -22,6 +22,7 @@ data Ast
   | Value NumType
   deriving (Show)
 
+-- A map from operators to precedence, with higher numbers being higher precedence
 type PrecedenceMap = Map.Map Char Int
 
 -- >>> tokenize "1 + (2 * 3)"
@@ -133,6 +134,10 @@ evalExpression expr =
         _ -> throwError $ "Unknown operator: " ++ show op
     Value n -> Right n
 
+-- >>> evalExpressionString (Map.fromList [('+', 2), ('*', 1)]) "2 * 3 + 4"
+-- Right 14
+-- >>> evalExpressionString (Map.fromList [('+', 1), ('*', 2)]) "2 * 3 + 4"
+-- Right 10
 evalExpressionString :: PrecedenceMap -> String -> Either String NumType
 evalExpressionString precs expr =
   do

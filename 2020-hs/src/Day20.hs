@@ -7,11 +7,18 @@ module Day20 where
 import Control.Monad (forM_, guard)
 import Data.Foldable (find)
 import Data.List (intersect, tails)
-import Data.List.Utils (join, split)
+import Data.String.Utils (join, replace, split)
 import Data.Map ((!), (!?))
 import qualified Data.Map as Map
+import qualified Data.Set as Set
 import Data.Maybe (catMaybes, mapMaybe, maybe)
+import System.IO.Unsafe (unsafePerformIO)
 import Utils (Solver)
+
+trace :: Show a => String -> a -> a
+trace msg x = unsafePerformIO $ do
+  print $ msg ++ show x
+  return x
 
 type Edge = String
 
@@ -70,17 +77,18 @@ type EdgeCounts = Map.Map Edge Int
 countEdges :: TileMap -> EdgeCounts
 countEdges tiles = fmap length (makeEdgeMap tiles)
 
-isCorner :: EdgeCounts -> Tile -> Bool
-isCorner counts tile =
-  let isOuter edge = (counts ! normalizeEdge edge) == 1
-   in length [e | e <- tileEdges tile, isOuter e] == 2
+isOuterEdge :: EdgeCounts -> Edge -> Bool
+isOuterEdge counts edge = (counts ! normalizeEdge edge) == 1
+
+isCornerTile :: EdgeCounts -> Tile -> Bool
+isCornerTile counts tile = length [e | e <- tileEdges tile, isOuterEdge counts e] == 2
 
 solvePart1 :: TileMap -> Int
 solvePart1 tiles =
   let counts = countEdges tiles
       -- This takes advantage of the fact that the problem definition states that outer edges won't match any other
       -- tiles.
-      cornerIds = [id | (id, tile) <- Map.assocs tiles, isCorner counts tile]
+      cornerIds = [id | (id, tile) <- Map.assocs tiles, isCornerTile counts tile]
    in product cornerIds
 
 -- Part 2.  In part 1 we could get away with not actually assembling the tiles, by just finding which tiles were the
@@ -111,69 +119,107 @@ flipTile = map reverse
 transforms :: Tile -> [Tile]
 transforms tile = [f (rotateTile angle tile) | angle <- [0, 90, 180, 270], f <- [id, flipTile]]
 
+data Problem = Problem
+  { tiles :: TileMap,
+    edgeMap :: Map.Map String [Int],
+    edgeCounts :: EdgeCounts
+  }
+  deriving (Show)
+
+parseProblem :: String -> Problem
+parseProblem input =
+  let tiles = parseTiles input
+   in Problem
+        { tiles = tiles,
+          edgeMap = makeEdgeMap tiles,
+          edgeCounts = countEdges tiles
+        }
+
+tilesWithEdges :: Problem -> [Edge] -> [IdTile]
+tilesWithEdges prob edges =
+  let tileIds = foldl1 intersect (map ((edgeMap prob !) . normalizeEdge) edges)
+   in mapMaybe (\id -> fmap (id,) (tiles prob !? id)) tileIds
+
+findCorners :: Problem -> [IdTile]
+findCorners prob = [a | a@(_, tile) <- Map.assocs (tiles prob), isCornerTile (edgeCounts prob) tile]
+
+assembleRow :: Problem -> Maybe Tile -> Maybe [Tile] -> [(Problem, [IdTile])]
+assembleRow prob leftTile rowAbove = do
+  -- If we run out of row above, fail
+  guard (maybe True (not . null) rowAbove)
+
+  let topEdge = tileBottom . head <$> rowAbove
+  let leftEdge = tileRight <$> leftTile
+  (nextId, nextTile) <- tilesWithEdges prob (catMaybes [leftEdge, topEdge])
+  let prob' = prob {tiles = Map.delete nextId (tiles prob)}
+
+  nextTransform <- transforms nextTile
+  let nextLeft = map head nextTransform
+  let nextTop = head nextTransform
+
+  guard (maybe True (== nextLeft) leftEdge)
+  guard (maybe True (== nextTop) topEdge)
+
+  if isOuterEdge (edgeCounts prob') (tileRight nextTransform)
+    then return (prob', [(nextId, nextTransform)])
+    else do
+      (prob', restRow) <- assembleRow prob' (Just nextTransform) (tail <$> rowAbove)
+      return (prob', (nextId, nextTransform) : restRow)
+
+assembleRows :: Problem -> Maybe [IdTile] -> [(Problem, [[IdTile]])]
+assembleRows prob _ | Map.null (tiles prob) = [(prob, [])]
+-- first row case
+assembleRows prob@(Problem tiles edgeMap edgeCounts) Nothing =
+  -- pick a corner, and find an orientation that puts the corner at the upper left
+  let (cornerId, cornerTile) = head (findCorners prob)
+      Just corner = find (\tile -> isOuterEdge edgeCounts (tileTop tile) && isOuterEdge edgeCounts (tileLeft tile)) (transforms cornerTile)
+      prob' = prob {tiles = Map.delete cornerId tiles}
+   in do
+        (prob', firstRowRest) <- assembleRow prob' (Just corner) Nothing
+        let firstRow = (cornerId, corner) : firstRowRest
+        (prob', rest) <- assembleRows prob' (Just firstRow)
+        return (prob', firstRow : rest)
+assembleRows prob (Just prevRow) = do
+  (prob', nextRow) <- assembleRow prob Nothing (Just $ map snd prevRow)
+  (prob', rest) <- assembleRows prob' (Just nextRow)
+  return (prob', nextRow : rest)
+
 -- Assemble tiles in correct arrangement. Result is a list of lists, where each sublist is a row of (tileId, tile)
 -- tuples, where tile is already flipped and rotated to fit.
-assembleTiles :: TileMap -> [[IdTile]]
-assembleTiles tiles =
-  case assembleRows tiles Nothing of
+assembleTiles :: Problem -> [[IdTile]]
+assembleTiles prob =
+  case assembleRows prob Nothing of
     (_, grid) : _ -> grid
     _ -> error "Couldn't find a solution"
-  where
-    edgeMap = makeEdgeMap tiles
-    edgeCounts = countEdges tiles
-    corners = [pair | pair@(_, tile) <- Map.assocs tiles, isCorner edgeCounts tile]
 
-    -- Return all tiles that cointain all the specified edges
-    tilesWithEdges :: TileMap -> [Edge] -> [IdTile]
-    tilesWithEdges tiles edges =
-      let tileIds = foldl1 intersect (map (edgeMap !) edges)
-       in mapMaybe (\id -> fmap (id,) (tiles !? id)) tileIds
+-- Concatenate tiles into one big tile, after stripping off edges as required for part 2
+concatTileCenters :: [[IdTile]] -> Tile
+concatTileCenters grid =
+  let tileCenter tile = map (init . tail) $ (init . tail) tile
+      tileCenters = [map (tileCenter . snd) row | row <- grid]
+   in [concat row | gridRow <- tileCenters, row <- zipMany gridRow]
 
-    -- Return all possible rows whose leftMost tile starts with leftEdge, and optionally matching rowAbove
-    -- It's an error if both leftEdge and rowAbove are Nothing
-    assembleRow :: TileMap -> Maybe Edge -> Maybe [Tile] -> [(TileMap, [IdTile])]
-    assembleRow tiles leftEdge rowAbove = do
-      -- If we run out of row above, fail
-      guard (maybe True (not . null) rowAbove)
-
-      let topEdge = tileBottom . head <$> rowAbove
-      (nextId, nextTile) <- tilesWithEdges tiles (catMaybes [normalizeEdge <$> leftEdge, topEdge])
-      let tiles' = Map.delete nextId tiles
-
-      nextTransform <- transforms nextTile
-      let nextLeft = map head nextTransform
-      let nextTop = head nextTransform
-
-      guard (maybe True (== nextLeft) leftEdge)
-      guard (maybe True (== nextTop) topEdge)
-
-      if isCorner edgeCounts nextTransform
-        then return (tiles', [(nextId, nextTransform)])
-        else do
-          (tiles', restRow) <- assembleRow tiles' (Just (tileRight nextTransform)) (tail <$> rowAbove)
-          return (tiles', (nextId, nextTransform) : restRow)
-
-    assembleRows :: TileMap -> Maybe [IdTile] -> [(TileMap, [[IdTile]])]
-    assembleRows tiles _ | Map.null tiles = []
-    -- first row case
-    assembleRows tiles Nothing =
-      -- pick a corner, and find an orientation that puts the corner at the upper left
-      let (cornerId, cornerTile) = head corners
-          Just corner = find (\tile -> (edgeCounts ! tileTop tile) == 1 && (edgeCounts ! tileLeft tile) == 1) (transforms cornerTile)
-          tiles' = Map.delete cornerId tiles
-       in do
-            (tiles', firstRow) <- assembleRow tiles' (Just (tileRight corner)) Nothing
-            (tiles', rest) <- assembleRows tiles' (Just firstRow)
-            return (tiles', firstRow : rest)
-    assembleRows tiles (Just prevRow) = do
-      (tiles', nextRow) <- assembleRow tiles Nothing (Just $ map snd prevRow)
-      (tiles', rest) <- assembleRows tiles' (Just nextRow)
-      return (tiles', nextRow : rest)
+-- Parse the monster pattern for part two into a regular expression.  It will match the monster assumming the grid
+-- is concatenated into a single string with newlines separating rows
+parsePattern :: Int -> String -> String
+parsePattern gridWidth input = 
+  let inputLines = filter (/= "") $ lines input 
+      patternWidth = maximum $ map length inputLines
+      patternChar ch = if ch == '#' then "[o#]" else "[^\n]"
+      rowRxes = map (concatMap patternChar) inputLines
+      filler = ".{" ++ show (gridWidth - patternWidth) ++ "}" 
+   in join filler rowRxes
 
 showGrid :: [[IdTile]] -> IO ()
 showGrid grid =
   forM_ grid $ \gridRow ->
-    do 
+    do
       forM_ (zipMany (map snd gridRow)) $ \row ->
         putStrLn (join " " row)
       putStrLn ""
+
+testAssembleTiles = do
+  input <- readFile "day20-test-input.txt"
+  let prob = parseProblem input
+  let grid = assembleTiles prob
+  showGrid grid
