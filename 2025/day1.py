@@ -1,4 +1,5 @@
-import os.path
+from utils import read_input_file
+
 
 def parse_input(txt: str) -> list[int]:
     """Parse input, storing left rotations as negative numbers and right
@@ -25,10 +26,12 @@ def solve_day1(rotations: list[int]) -> int:
 
     return num_zeroes
 
+
 def solve_day2(rotations: list[int]) -> int:
     num_zeroes = 0
     position = 50
     for rotation in rotations:
+        # count how many times we pass zero rather than just how many times we land on it
         if rotation > 0:
             num_zeroes += (position + rotation) // 100
         else:
@@ -39,9 +42,7 @@ def solve_day2(rotations: list[int]) -> int:
 
 
 def main():
-    mydir = os.path.dirname(__file__)
-    with open(os.path.join(mydir, "inputs/day1-input.txt")) as f:
-        rotations = parse_input(f.read())
+    rotations = parse_input(read_input_file('day1-input.txt'))
 
     day1_solution = solve_day1(rotations)
     print(f"Solution to day 1: {day1_solution}")
