@@ -24,20 +24,60 @@ def solve_part1(pairs: list[tuple[int, int]]) -> int:
             low = max(a, 10 ** (num_digits - 1))
             high = min(b, 10**num_digits - 1)
 
+            seq_len = num_digits // 2
+
             # Find lowest candidate digit sequence, i.e. lowest number like <sequence><sequence> >= low
             low_str = str(low)
-            low_sequence = int(low_str[: num_digits // 2])
-            if low_sequence < int(low_str[num_digits // 2 :]):
+            low_sequence = int(low_str[:seq_len])
+            if low_sequence < int(low_str[seq_len:]):
                 low_sequence += 1
 
             # Highest candidate digit sequence, .e. <sequence><sequence> <= high
             high_str = str(high)
-            high_sequence = int(high_str[: num_digits // 2])
-            if high_sequence > int(high_str[num_digits // 2 :]):
+            high_sequence = int(high_str[:seq_len])
+            if high_sequence > int(high_str[seq_len:]):
                 high_sequence -= 1
 
             for s in range(low_sequence, high_sequence + 1):
-                answer += int(str(s) + str(s))
+                answer += int(str(s) * 2)
+
+    return answer
+
+
+def solve_part2(pairs: list[tuple[int, int]]) -> int:
+    """
+    Part 2 is a generalization of part 1. For each range, find numbers within that range that consist of
+    a sequence of digits repeated *at least* twice, instead of *exactly* twice.
+    """
+    answer = 0
+
+    for a, b in pairs:
+        a_len = len(str(a))
+        b_len = len(str(b))
+
+        seen = set()
+
+        for num_digits in range(a_len, b_len + 1):
+            low = max(a, 10 ** (num_digits - 1))
+            high = min(b, 10**num_digits - 1)
+            low_str = str(low)
+            high_str = str(high)
+
+            for seq_len in range(1, num_digits // 2 + 1):
+                if num_digits % seq_len != 0:
+                    continue
+
+                # Find lowest candidate digit sequence
+                low_sequence = int(low_str[:seq_len])
+
+                # Highest candidate digit sequence
+                high_sequence = int(high_str[:seq_len])
+
+                for s in range(low_sequence, high_sequence + 1):
+                    num = int(str(s) * (num_digits // seq_len))
+                    if num not in seen and (a <= num <= b):
+                        seen.add(num)
+                        answer += num
 
     return answer
 
@@ -47,6 +87,9 @@ def main():
 
     part1_solution = solve_part1(pairs)
     print(f"Part 1 solution = {part1_solution}")
+
+    part2_solution = solve_part2(pairs)
+    print(f"Part 2 solution = {part2_solution}")
 
 
 if __name__ == "__main__":
