@@ -31,13 +31,13 @@ def solve(banks: list[str], num_digits: int) -> int:
     return answer
 
 
-def solve_day1(banks: list[str]) -> int:
+def solve_part1(banks: list[str]) -> int:
     return solve(banks, 2)
 
 
-def solve_day2(banks: list[str]) -> int:
+def solve_part2(banks: list[str]) -> int:
     return solve(banks, 12)
 
 
 if __name__ == "__main__":
-    run_day("day3-input.txt", parse_input, solve_day1, solve_day2)
+    run_day("day3-input.txt", parse_input, solve_part1, solve_part2)

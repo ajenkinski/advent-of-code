@@ -16,7 +16,7 @@ def parse_input(txt: str) -> list[int]:
     return rotations
 
 
-def solve_day1(rotations: list[int]) -> int:
+def solve_part1(rotations: list[int]) -> int:
     num_zeroes = 0
     position = 50
     for rotation in rotations:
@@ -27,7 +27,7 @@ def solve_day1(rotations: list[int]) -> int:
     return num_zeroes
 
 
-def solve_day2(rotations: list[int]) -> int:
+def solve_part2(rotations: list[int]) -> int:
     num_zeroes = 0
     position = 50
     for rotation in rotations:
@@ -42,4 +42,4 @@ def solve_day2(rotations: list[int]) -> int:
 
 
 if __name__ == "__main__":
-    run_day("day1-input.txt", parse_input, solve_day1, solve_day2)
+    run_day("day1-input.txt", parse_input, solve_part1, solve_part2)
