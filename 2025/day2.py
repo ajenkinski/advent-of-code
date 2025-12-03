@@ -1,4 +1,4 @@
-from utils import read_input_file
+from utils import run_day
 
 
 def parse_input(txt: str) -> list[tuple[int, int]]:
@@ -82,15 +82,5 @@ def solve_part2(pairs: list[tuple[int, int]]) -> int:
     return answer
 
 
-def main():
-    pairs = parse_input(read_input_file("day2-input.txt"))
-
-    part1_solution = solve_part1(pairs)
-    print(f"Part 1 solution = {part1_solution}")
-
-    part2_solution = solve_part2(pairs)
-    print(f"Part 2 solution = {part2_solution}")
-
-
 if __name__ == "__main__":
-    main()
+    run_day("day2-input.txt", parse_input, solve_part1, solve_part2)

@@ -1,4 +1,8 @@
-from utils import read_input_file
+from utils import run_day
+
+
+def parse_input(txt: str) -> list[str]:
+    return list(txt.splitlines())
 
 
 def solve(banks: list[str], num_digits: int) -> int:
@@ -27,15 +31,13 @@ def solve(banks: list[str], num_digits: int) -> int:
     return answer
 
 
-def main():
-    banks = list(read_input_file("day3-input.txt").splitlines())
+def solve_day1(banks: list[str]) -> int:
+    return solve(banks, 2)
 
-    part1_solution = solve(banks, 2)
-    print(f"Part 1 solution = {part1_solution}")
 
-    part2_solution = solve(banks, 12)
-    print(f"Part 2 solution = {part2_solution}")
+def solve_day2(banks: list[str]) -> int:
+    return solve(banks, 12)
 
 
 if __name__ == "__main__":
-    main()
+    run_day("day3-input.txt", parse_input, solve_day1, solve_day2)

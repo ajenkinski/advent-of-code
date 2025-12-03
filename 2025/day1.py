@@ -1,4 +1,4 @@
-from utils import read_input_file
+from utils import run_day
 
 
 def parse_input(txt: str) -> list[int]:
@@ -9,7 +9,7 @@ def parse_input(txt: str) -> list[int]:
         if not line:
             continue
         num = int(line[1:])
-        if line[0] == 'L':
+        if line[0] == "L":
             num = -num
         rotations.append(num)
 
@@ -41,15 +41,5 @@ def solve_day2(rotations: list[int]) -> int:
     return num_zeroes
 
 
-def main():
-    rotations = parse_input(read_input_file('day1-input.txt'))
-
-    day1_solution = solve_day1(rotations)
-    print(f"Solution to day 1: {day1_solution}")
-
-    day2_solution = solve_day2(rotations)
-    print(f"Solution to day 2: {day2_solution}")
-
-
 if __name__ == "__main__":
-    main()
+    run_day("day1-input.txt", parse_input, solve_day1, solve_day2)
