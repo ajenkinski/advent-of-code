@@ -1,3 +1,5 @@
+# https://adventofcode.com/2025/day/4
+
 from copy import deepcopy
 from typing import Iterable
 
@@ -9,6 +11,10 @@ def parse_input(txt: str) -> list[list[str]]:
 
 
 def find_accessible_cells(grid: list[list[str]]) -> Iterable[tuple[int, int]]:
+    """
+    Find the (row, col) coordinates of all non-empty cells which have fewer than 4 non-empty
+    neighbors.
+    """
     for row_num, row in enumerate(grid):
         for col_num in range(len(row)):
             if row[col_num] != "@":

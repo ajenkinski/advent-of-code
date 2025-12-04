@@ -1,3 +1,5 @@
+# https://adventofcode.com/2025/day/2
+
 from utils import run_day
 
 
