@@ -48,4 +48,9 @@ defmodule Day1 do
   end
 end
 
-Aoc2025.Utils.run_day("day1-input.txt", &Day1.parse_input/1, &Day1.solve_part1/1, &Day1.solve_part2/1)
+Aoc2025.Utils.run_day(
+  "day1-input.txt",
+  &Day1.parse_input/1,
+  &Day1.solve_part1/1,
+  &Day1.solve_part2/1
+)

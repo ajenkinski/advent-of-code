@@ -18,6 +18,10 @@ defmodule Aoc2025.Utils do
     input = read_input(input_filename)
     parsed_input = parse_input.(input)
 
+    if !solve_part1 && !solve_part2 do
+      IO.inspect(parsed_input, label: "Parsed input")
+    end
+
     if solve_part1 do
       part1_solution = solve_part1.(parsed_input)
       IO.puts("Part 1 solution = #{part1_solution}")
