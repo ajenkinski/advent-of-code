@@ -15,6 +15,18 @@ def find_accessible_cells(grid: list[list[str]]) -> Iterable[tuple[int, int]]:
     Find the (row, col) coordinates of all non-empty cells which have fewer than 4 non-empty
     neighbors.
     """
+
+    directions = [
+        (-1, -1),
+        (-1, 0),
+        (-1, 1),
+        (0, 1),
+        (1, 1),
+        (1, 0),
+        (1, -1),
+        (0, -1),
+    ]
+
     for row_num, row in enumerate(grid):
         for col_num in range(len(row)):
             if row[col_num] != "@":
@@ -23,16 +35,7 @@ def find_accessible_cells(grid: list[list[str]]) -> Iterable[tuple[int, int]]:
             num_neigbors = sum(
                 (
                     grid[nr][nc] == "@"
-                    for dr, dc in [
-                        (-1, -1),
-                        (-1, 0),
-                        (-1, 1),
-                        (0, 1),
-                        (1, 1),
-                        (1, 0),
-                        (1, -1),
-                        (0, -1),
-                    ]
+                    for dr, dc in directions
                     for nr, nc in [(row_num + dr, col_num + dc)]
                     if (0 <= nr < len(grid)) and (0 <= nc < len(row))
                 )
