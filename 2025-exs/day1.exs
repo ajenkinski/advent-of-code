@@ -48,11 +48,4 @@ defmodule Day1 do
   end
 end
 
-{:ok, input} = File.read("inputs/day1-input.txt")
-rotations = Day1.parse_input(input)
-
-part1_solution = Day1.solve_part1(rotations)
-IO.puts("Part 1 solution = #{part1_solution}")
-
-part2_solution = Day1.solve_part2(rotations)
-IO.puts("Part 2 solution = #{part2_solution}")
+Aoc2025.Utils.run_day("day1-input.txt", &Day1.parse_input/1, &Day1.solve_part1/1, &Day1.solve_part2/1)
