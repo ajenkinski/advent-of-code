@@ -21,8 +21,9 @@ def solve(banks: list[str], num_digits: int) -> int:
         bank_len = len(bank)
 
         for i, digit in enumerate(bank):
-            for j in range(len(digits)):
-                if i < (bank_len - (num_digits - j - 1)) and digit > digits[j]:
+            num_left = bank_len - i
+            for j in range(max(0, num_digits - num_left), num_digits):
+                if digit > digits[j]:
                     digits[j] = digit
                     for k in range(j + 1, len(digits)):
                         digits[k] = "0"
