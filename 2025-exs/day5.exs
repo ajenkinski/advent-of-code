@@ -10,6 +10,7 @@ defmodule Day5 do
         String.to_integer(first)..String.to_integer(last)
       end
 
+    # merge all overlapping ranges, so we end up with a list of only disjoint ranges
     merged_ranges =
       Enum.reduce(fresh_ranges, [], fn range, merged ->
         {non_overlapping, overlapping} = Enum.split_with(merged, &Range.disjoint?(&1, range))
@@ -23,7 +24,7 @@ defmodule Day5 do
       end)
       |> Enum.sort(&(&1.first <= &2.first))
 
-    ingredients = for line <- String.split(ingredients_str), do: String.to_integer(line)
+    ingredients = Enum.map(String.split(ingredients_str), &String.to_integer/1)
 
     %Day5{fresh_ranges: merged_ranges, ingredients: ingredients}
   end
@@ -33,6 +34,15 @@ defmodule Day5 do
       Enum.find(input.fresh_ranges, &(ingredient in &1))
     end)
   end
+
+  def solve_part2(input) do
+    Enum.sum_by(input.fresh_ranges, &Range.size/1)
+  end
 end
 
-Aoc2025.Utils.run_day("day5-input.txt", &Day5.parse_input/1, &Day5.solve_part1/1)
+Aoc2025.Utils.run_day(
+  "day5-input.txt",
+  &Day5.parse_input/1,
+  &Day5.solve_part1/1,
+  &Day5.solve_part2/1
+)
