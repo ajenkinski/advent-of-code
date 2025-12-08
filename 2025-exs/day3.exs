@@ -4,9 +4,8 @@ defmodule Day3 do
   end
 
   @doc """
-  Bank is a list of digits, represented as strings.  Returns the largest
-  number that can be made by choosing num_digits digits from bank, preserving
-  their order.
+  Bank is a string of digits.  Returns the largest number that can be made by
+  choosing num_digits digits from bank, preserving their order.
   """
   def solve_bank(bank, num_digits) do
     bank_len = String.length(bank)
@@ -16,10 +15,12 @@ defmodule Day3 do
     |> Enum.reduce(List.duplicate("0", num_digits), fn {bank_digit, i}, digits ->
       num_left = bank_len - i
 
+      # Update digits by possibly replacing one of the digits with bank_digit.
       Enum.reduce_while(Enum.with_index(digits), [], fn {digit, j}, new_digits ->
         if j < num_digits - num_left or bank_digit <= digit do
           {:cont, [digit | new_digits]}
         else
+          # Found digit to replace. Reset subsequent digits to 0
           {:halt, List.duplicate("0", num_digits - j - 1) ++ [bank_digit | new_digits]}
         end
       end)
@@ -31,8 +32,8 @@ defmodule Day3 do
 
   @doc """
   Each bank consists of a string a digits. For each bank, find the largest
-  number that can be made by choosing num_digits digits from the bank, preserving
-  their order.  Return the sum of these numbers.
+  number that can be made by choosing num_digits digits from the bank,
+  preserving their order.  Return the sum of these numbers.
   """
   def solve(banks, num_digits) do
     Enum.sum_by(banks, &solve_bank(&1, num_digits))
