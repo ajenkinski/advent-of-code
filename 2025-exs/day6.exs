@@ -46,14 +46,15 @@ defmodule Day6 do
     end)
   end
 
+  @doc """
+  Part 2 wants you to treat each column as consisting of vertical columns of digits.
+  """
   def solve_part2(input) do
     Enum.sum_by(Enum.zip(input.columns, input.operators), fn {col, op} ->
-      padded_col =
-        Enum.map(col, &String.graphemes/1)
-
-      Enum.zip(padded_col)
-      |> Enum.map(fn n ->
-        Tuple.to_list(n)
+      Enum.map(col, &String.graphemes/1)
+      |> Enum.zip()
+      |> Enum.map(fn digits ->
+        Tuple.to_list(digits)
         |> Enum.join()
         |> String.trim()
         |> String.to_integer()
