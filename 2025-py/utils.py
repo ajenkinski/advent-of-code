@@ -1,4 +1,5 @@
 import os
+from pprint import pprint
 from typing import Callable, Optional
 
 
@@ -21,6 +22,9 @@ def run_day[ProblemT, SolutionT](input_filename: str,
     """
     input_txt = read_input_file(input_filename)
     problem = parse_input(input_txt)
+    
+    if not (solve_part1 or solve_part2):
+        pprint(problem)
 
     part1_solution = part2_solution = None
 
