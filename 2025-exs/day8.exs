@@ -5,8 +5,10 @@ defmodule Day8 do
 
   defstruct points: [], pair_distances: []
 
+  # Returns squared distance between two points.  No need for sqrt since we just care about 
+  # relative distances
   defp distance(p1, p2) do
-    ((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2 + (p1.z - p2.z) ** 2) ** 0.5
+    (p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2 + (p1.z - p2.z) ** 2
   end
 
   def parse_input(txt) do
@@ -20,9 +22,9 @@ defmodule Day8 do
 
     pair_distances =
       for [p1, p2] <- Combinatorics.n_combinations(2, points) do
-        {distance(p1, p2), {p1, p2}}
+        {p1, p2}
       end
-      |> Enum.sort(fn {d1, _}, {d2, _} -> d1 <= d2 end)
+      |> Enum.sort_by(fn {p1, p2} -> distance(p1, p2) end)
 
     %Day8{points: points, pair_distances: pair_distances}
   end
@@ -30,11 +32,7 @@ defmodule Day8 do
   def solve_part1(input) do
     g =
       Graph.new(type: :undirected)
-      |> Graph.add_edges(
-        for {_, {p1, p2}} <- Stream.take(input.pair_distances, 1000) do
-          {p1, p2}
-        end
-      )
+      |> Graph.add_edges(Stream.take(input.pair_distances, 1000))
 
     Graph.components(g)
     |> Enum.map(&Enum.count/1)
@@ -47,7 +45,7 @@ defmodule Day8 do
     # instead of using a graph library to find connected components, collect
     # them myself as a list of MapSets which I add points to.  When a new point
     # pair spans two components I merge them together.
-    Enum.reduce(Stream.take(input.pair_distances, 1000), [], fn {_, {p1, p2}}, components ->
+    Enum.reduce(Stream.take(input.pair_distances, 1000), [], fn {p1, p2}, components ->
       {with, without} =
         Enum.split_with(components, fn g -> MapSet.member?(g, p1) or MapSet.member?(g, p2) end)
 
@@ -70,21 +68,21 @@ defmodule Day8 do
     num_points = Enum.count(input.points)
 
     {p1, p2} =
-      Enum.reduce_while(input.pair_distances, [], fn {_, {p1, p2}}, components ->
+      Enum.reduce_while(input.pair_distances, [], fn {p1, p2}, components ->
         {with, without} =
           Enum.split_with(components, fn c -> MapSet.member?(c, p1) or MapSet.member?(c, p2) end)
 
-        with =
+        merged =
           if Enum.empty?(with) do
             MapSet.new([p1, p2])
           else
             Enum.reduce(with, &MapSet.union/2) |> MapSet.put(p1) |> MapSet.put(p2)
           end
 
-        if MapSet.size(with) == num_points do
+        if MapSet.size(merged) == num_points do
           {:halt, {p1, p2}}
         else
-          {:cont, [with | without]}
+          {:cont, [merged | without]}
         end
       end)
 
