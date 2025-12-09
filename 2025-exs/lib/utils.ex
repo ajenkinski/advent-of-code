@@ -23,13 +23,11 @@ defmodule Aoc2025.Utils do
     end
 
     if solve_part1 do
-      part1_solution = solve_part1.(parsed_input)
-      IO.puts("Part 1 solution = #{part1_solution}")
+      solve_part1.(parsed_input) |> IO.inspect(label: "Part 1 solution")
     end
 
     if solve_part2 do
-      part2_solution = solve_part2.(parsed_input)
-      IO.puts("Part 2 solution = #{part2_solution}")
+      solve_part2.(parsed_input) |> IO.inspect(label: "Part 2 solution")
     end
   end
 end
