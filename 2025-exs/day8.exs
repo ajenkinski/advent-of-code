@@ -53,13 +53,36 @@ defmodule Day8 do
     |> Enum.product()
   end
 
+  def solve_part1_no_graph(input) do
+    # instead of using a graph library to find connected components, collect
+    # them myself as a list of MapSets which I add points to.  When a new point
+    # pair spans two components I merge them together.
+    Enum.reduce(Stream.take(input.pair_distances, 1000), [], fn {_, {p1, p2}}, components ->
+      {with, without} =
+        Enum.split_with(components, fn g -> MapSet.member?(g, p1) or MapSet.member?(g, p2) end)
+
+      merged =
+        if Enum.empty?(with) do
+          MapSet.new([p1, p2])
+        else
+          Enum.reduce(with, &MapSet.union/2) |> MapSet.put(p1) |> MapSet.put(p2)
+        end
+
+      [merged | without]
+    end)
+    |> Enum.map(&MapSet.size/1)
+    |> Enum.sort(:desc)
+    |> Enum.take(3)
+    |> Enum.product()
+  end
+
   def solve_part2(input) do
     num_points = Enum.count(input.points)
 
     {p1, p2} =
-      Enum.reduce_while(input.pair_distances, [], fn {_, {p1, p2}}, groups ->
+      Enum.reduce_while(input.pair_distances, [], fn {_, {p1, p2}}, components ->
         {with, without} =
-          Enum.split_with(groups, fn g -> MapSet.member?(g, p1) or MapSet.member?(g, p2) end)
+          Enum.split_with(components, fn c -> MapSet.member?(c, p1) or MapSet.member?(c, p2) end)
 
         with =
           if Enum.empty?(with) do
@@ -82,6 +105,6 @@ end
 Aoc2025.Utils.run_day(
   "day8-input.txt",
   &Day8.parse_input/1,
-  &Day8.solve_part1/1,
+  &Day8.solve_part1_no_graph/1,
   &Day8.solve_part2/1
 )
