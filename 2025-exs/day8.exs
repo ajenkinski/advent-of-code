@@ -9,16 +9,6 @@ defmodule Day8 do
     ((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2 + (p1.z - p2.z) ** 2) ** 0.5
   end
 
-  @spec n_combinations(pos_integer(), list()) :: [list()]
-  defp n_combinations(0, _), do: [[]]
-  defp n_combinations(_, []), do: []
-
-  defp n_combinations(n, [h | t]) do
-    sublists = for l <- n_combinations(n - 1, t), do: [h | l]
-
-    sublists ++ n_combinations(n, t)
-  end
-
   def parse_input(txt) do
     points =
       String.trim(txt)
@@ -29,7 +19,7 @@ defmodule Day8 do
       end)
 
     pair_distances =
-      for [p1, p2] <- n_combinations(2, points) do
+      for [p1, p2] <- Combinatorics.n_combinations(2, points) do
         {distance(p1, p2), {p1, p2}}
       end
       |> Enum.sort(fn {d1, _}, {d2, _} -> d1 <= d2 end)
