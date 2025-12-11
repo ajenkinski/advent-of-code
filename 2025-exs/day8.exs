@@ -21,9 +21,8 @@ defmodule Day8 do
       end)
 
     pair_distances =
-      for [p1, p2] <- Combinatorics.n_combinations(2, points) do
-        {p1, p2}
-      end
+      Combinatorics.n_combinations(2, points)
+      |> Enum.map(&List.to_tuple/1)
       |> Enum.sort_by(fn {p1, p2} -> distance(p1, p2) end)
 
     %Day8{points: points, pair_distances: pair_distances}

@@ -134,7 +134,7 @@ defmodule Day9 do
     end)
   end
 
-  def line_intersects_rectangle?({lp1, lp2}, {rp1, rp2}) do
+  def line_intersects_rectangle?({lp1, lp2} = _line, {rp1, rp2} = _rectangle) do
     rleft = min(rp1.x, rp2.x)
     rright = max(rp1.x, rp2.x)
     rtop = min(rp1.y, rp2.y)
@@ -145,7 +145,6 @@ defmodule Day9 do
     ltop = min(lp1.y, lp2.y)
     lbottom = max(lp1.y, lp2.y)
 
-    # Line is vertical or horizontal
     case line_direction({lp1, lp2}) do
       :hor -> lp1.y >= rtop and lp1.y <= rbottom and lright >= rleft and lleft <= rright
       :vert -> lp1.x >= rleft and lp1.x <= rright and lbottom >= rtop and ltop <= rbottom
@@ -156,7 +155,10 @@ defmodule Day9 do
     # all line segments of polygon
     polygon = Enum.chunk_every(points, 2, 1, [List.first(points)]) |> Enum.map(&List.to_tuple/1)
 
-    # Expand outward so we can use line crossing algorithm to test rectangles
+    # Expand outward so we can use line crossing algorithm to test rectangles.
+    # Because we've expanded polygon outward by 0.1, we can assume that any
+    # rectangle we test which doesn't interesect with any expanded_polygon edge
+    # is inside the polygon
     expanded_polygon = expand_polygon(polygon, 0.1)
 
     Combinatorics.n_combinations(2, points)
