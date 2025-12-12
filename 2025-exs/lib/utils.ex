@@ -29,5 +29,7 @@ defmodule Aoc2025.Utils do
     if solve_part2 do
       solve_part2.(parsed_input) |> IO.inspect(label: "Part 2 solution")
     end
+
+    parsed_input
   end
 end
